@@ -45,14 +45,17 @@ jobs:
 
       - name: Zip for macos
         if: matrix.os == 'macos-latest'
-        run: tar -czpvf raylib-games-macos.tar.gz -C ./build/bin .
+        run: |
+          mkdir -p dmg_staging
+          cp -r ./build/bin/* dmg_staging/
+          hdiutil create -volname "Raylib Games" -srcfolder ./dmg_staging -ov -format UDZO raylib-games-macos.dmg
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
           name: raylib-games-${{ matrix.os }}
           path: ./raylib-games-*
-  
+
   release:
     name: Create Release
     needs: build
@@ -63,7 +66,7 @@ jobs:
         with:
           pattern: raylib-games-*
           merge-multiple: true
-      
+
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
@@ -71,4 +74,4 @@ jobs:
           files: |
             raylib-games-ubuntu.tar.gz
             raylib-games-windows.zip
-            raylib-games-macos.tar.gz
+            raylib-games-macos.dmg
