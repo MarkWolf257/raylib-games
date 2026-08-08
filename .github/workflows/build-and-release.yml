@@ -4,12 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      tag_to_release:
-        description: 'Which tag do you want to run this on? (e.g., v1.0.0)'
-        required: true
-        type: string
 
 permissions:
   contents: write
@@ -36,16 +30,27 @@ jobs:
           sudo apt install libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
 
       - name: Configure CMake
-        run: cmake -B build
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build --config Release
 
+      - name: Zip for ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: tar -C ./build/bin -czpvf raylib-games-${{ matrix.os }}.tar.gz
+
+      - name: Zip for windows
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path .\build\bin\* -Destination .\raylib-games-${{ matrix.os }}.zip
+
+      - name: Zip for macos
+        if: matrix.os == 'macos-latest'
+        run: tar -C ./build/bin -czpvf raylib-games-${{ matrix.os }}.tar.gz
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: raylib-games-${{ matrix.os }}
-          path: build/bin/
+          path: ./raylib-games-${{ matrix.os }}.zip
   
   release:
     name: Create Release
@@ -56,18 +61,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           pattern: raylib-games-*
-
-      - name: Zip artifacts
-        run: |
-          zip -r raylib-games-ubuntu.zip raylib-games-ubuntu-latest
-          zip -r raylib-games-windows.zip raylib-games-windows-latest
-          zip -r raylib-games-macos.zip raylib-games-macos-latest
       
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
           files: |
-            raylib-games-ubuntu.zip
+            raylib-games-ubuntu.tar.gz
             raylib-games-windows.zip
-            raylib-games-macos.zip
+            raylib-games-macos.tar.gz
