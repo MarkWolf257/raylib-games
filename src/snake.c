@@ -15,6 +15,7 @@ typedef struct Snake {
   size_t tail;
   Vector2 *body;
   Vector2 direction;
+  Vector2 lastMovedDirection;
   bool collisionGrid[GRID_WIDTH][GRID_HEIGHT];
 } Snake;
 
@@ -90,10 +91,11 @@ void moveSnake(Snake *snake) {
   growSnake(snake);
   snake->collisionGrid[(int)snake->body[snake->tail].x][(int)snake->body[snake->tail].y] = false;
   snake->tail = (snake->tail + 1) % BODY_MAX;
+  snake->lastMovedDirection = snake->direction;
 }
 
 void turnSnake(Snake *snake, Vector2 newDirection) {
-  if (newDirection.x == -snake->direction.x && newDirection.y == -snake->direction.y) {
+  if (newDirection.x == -snake->lastMovedDirection.x && newDirection.y == -snake->lastMovedDirection.y) {
     return;
   }
   snake->direction = newDirection;
