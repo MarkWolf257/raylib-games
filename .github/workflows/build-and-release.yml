@@ -37,20 +37,20 @@ jobs:
 
       - name: Zip for ubuntu
         if: matrix.os == 'ubuntu-latest'
-        run: tar -czpvf raylib-games-${{ matrix.os }}.tar.gz -C ./build/bin .
+        run: tar -czpvf raylib-games-ubuntu.tar.gz -C ./build/bin .
 
       - name: Zip for windows
         if: matrix.os == 'windows-latest'
-        run: Compress-Archive -Path .\build\bin\* -Destination .\raylib-games-${{ matrix.os }}.zip
+        run: Compress-Archive -Path .\build\bin\* -Destination .\raylib-games-windows.zip
 
       - name: Zip for macos
         if: matrix.os == 'macos-latest'
-        run: tar -czpvf raylib-games-${{ matrix.os }}.tar.gz -C ./build/bin .
+        run: tar -czpvf raylib-games-macos.tar.gz -C ./build/bin .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          path: ./raylib-games-${{ matrix.os }}.zip
+          path: ./raylib-games-*
   
   release:
     name: Create Release
